@@ -1,0 +1,36 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime data (never commit databases, market data, logs, reports)
+*.db
+*.sqlite
+*.sqlite3
+data/*
+!data/.gitkeep
+reports/*
+!reports/.gitkeep
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
