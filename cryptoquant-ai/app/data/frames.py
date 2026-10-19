@@ -7,7 +7,7 @@ increasing, unique) and float columns open/high/low/close/volume.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 import pandas as pd
 
@@ -62,3 +62,20 @@ def last_complete_index(frame: pd.DataFrame, timeframe: str, as_of: datetime) ->
     step = pd.Timedelta(seconds=SUPPORTED_TIMEFRAMES[timeframe])
     closes = frame.index + step
     return int((closes <= pd.Timestamp(to_utc(as_of))).sum())
+
+
+def timeframe_delta(timeframe: str) -> timedelta:
+    if timeframe not in SUPPORTED_TIMEFRAMES:
+        raise FrameError(f"unsupported timeframe {timeframe}")
+    return timedelta(seconds=SUPPORTED_TIMEFRAMES[timeframe])
+
+
+def floor_time(dt: datetime, timeframe: str) -> datetime:
+    """Floor ``dt`` to the UTC epoch grid for ``timeframe`` (the open time of the bar containing ``dt``)."""
+    step = SUPPORTED_TIMEFRAMES[timeframe] if timeframe in SUPPORTED_TIMEFRAMES else timeframe_delta(timeframe)
+    secs = int(to_utc(dt).timestamp())
+    return datetime.fromtimestamp(secs - secs % step, tz=UTC)
+
+
+def is_aligned(dt: datetime, timeframe: str) -> bool:
+    return floor_time(dt, timeframe) == to_utc(dt)

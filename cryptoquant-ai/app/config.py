@@ -28,6 +28,12 @@ SUPPORTED_TIMEFRAMES: dict[str, int] = {
     "1d": 86400,
 }
 
+# Verified against https://docs.delta.exchange and the Delta India PyPI client page (Oct 2026).
+DELTA_INDIA_REST_URL = "https://api.india.delta.exchange"
+DELTA_INDIA_TESTNET_REST_URL = "https://cdn-ind.testnet.deltaex.org"
+# Candle channels moved here; the legacy socket.india.delta.exchange was scheduled for removal 31-Jul-2026.
+DELTA_INDIA_PUBLIC_WS_URL = "wss://public-socket.india.delta.exchange"
+
 _PLACEHOLDER_VALUES = {"", "your_api_key_here", "your_api_secret_here", "changeme"}
 
 
@@ -83,6 +89,15 @@ class ExchangeSettings(BaseModel):
         if raw is None or (isinstance(raw, str) and raw.strip().lower() in _PLACEHOLDER_VALUES):
             return None
         return v
+
+    @property
+    def rest_url(self) -> str:
+        """Configured URL, else production India. Public market data needs no credentials."""
+        return self.base_url or DELTA_INDIA_REST_URL
+
+    @property
+    def public_ws_url(self) -> str:
+        return self.ws_url or DELTA_INDIA_PUBLIC_WS_URL
 
     @property
     def has_credentials(self) -> bool:

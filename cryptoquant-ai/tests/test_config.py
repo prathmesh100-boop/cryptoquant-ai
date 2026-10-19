@@ -99,3 +99,11 @@ def test_risk_per_trade_cannot_exceed_daily_limit(monkeypatch):
     monkeypatch.setenv("CQ_RISK__RISK_PER_TRADE_PCT", "3")
     with pytest.raises(ValidationError, match="daily_loss_limit"):
         Settings()
+
+
+def test_exchange_urls_default_to_verified_india_production_and_can_be_overridden(monkeypatch):
+    s = Settings()
+    assert s.exchange.rest_url == "https://api.india.delta.exchange"
+    assert s.exchange.public_ws_url == "wss://public-socket.india.delta.exchange"
+    monkeypatch.setenv("CQ_EXCHANGE__BASE_URL", "https://cdn-ind.testnet.deltaex.org")
+    assert Settings().exchange.rest_url == "https://cdn-ind.testnet.deltaex.org"

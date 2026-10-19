@@ -31,3 +31,18 @@ def make_frame(n: int = 60, timeframe: str = "1h", start: datetime | None = None
     low = np.minimum(open_, close) - 0.2
     idx = pd.DatetimeIndex([start + i * step for i in range(n)], name="open_time")
     return pd.DataFrame({"open": open_, "high": high, "low": low, "close": close, "volume": 10.0}, index=idx)
+
+
+from app.models import Candle  # noqa: E402
+
+T0 = datetime(2024, 1, 1, tzinfo=UTC)
+
+
+def make_candles(n: int = 10, timeframe: str = "1h", start: datetime = T0, symbol: str = "BTCUSD") -> list[Candle]:
+    """Deterministic candles; close of bar i is 100 + i so values are easy to assert on."""
+    step = timedelta(seconds=SUPPORTED_TIMEFRAMES[timeframe])
+    return [
+        Candle(symbol=symbol, timeframe=timeframe, open_time=start + i * step, open=100 + i - 0.5,
+               high=100 + i + 1, low=100 + i - 1, close=100 + i, volume=10 + i)
+        for i in range(n)
+    ]

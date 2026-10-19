@@ -17,6 +17,7 @@ import pandas as pd
 
 from app.config import SUPPORTED_TIMEFRAMES
 from app.data.frames import FrameError, validate_frame
+from app.data.quality import is_stale
 from app.models import Direction, Regime, Signal, to_utc
 
 
@@ -65,10 +66,11 @@ class BaseStrategy(ABC):
         if len(ctx.candles) < self.min_candles:
             return [f"insufficient data: {len(ctx.candles)} < {self.min_candles} candles"]
         step = timedelta(seconds=SUPPORTED_TIMEFRAMES[ctx.timeframe])
-        last_close = ctx.candles.index[-1].to_pydatetime() + step
+        last_open = ctx.candles.index[-1].to_pydatetime()
+        last_close = last_open + step
         if last_close > as_of:
             return ["last candle is not yet complete (look-ahead guard)"]
-        if as_of - last_close > step * ctx.max_staleness_candles:
+        if is_stale(last_open, ctx.timeframe, as_of, ctx.max_staleness_candles):
             return [f"stale data: last candle closed {as_of - last_close} ago"]
         return []
 
